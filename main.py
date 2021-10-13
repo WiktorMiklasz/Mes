@@ -32,10 +32,6 @@ class Element:
 
 
 class Grid:
-    H = 0.2
-    B = 0.1
-    nH = 5
-    nB = 4
     nodes = []
     nodesCoordinated = []
     elements = []
