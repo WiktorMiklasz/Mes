@@ -7,10 +7,10 @@ class Node:
         self.y = y
 
     def __str__(self):
-        return f'\nx value is {self.x},y value is {self.y}'
+        return f'\nx: {self.x}, y: {self.y}'
 
     def __repr__(self):
-        return f'\nx value is {self.x}, y value is {self.y}'
+        return f'\nx: {self.x}, y: {self.y}'
 
 
 class Element:
@@ -51,9 +51,6 @@ class Grid:
         self.yB = self.B / (self.nB - 1)
         self.createNodes()
         self.createCoordinatedNodes()
-        #not needed, resetting it twice in methods anyway
-        #self.x = 0
-        #self.y = 0
         self.createElements()
 
     def printGridData(self):
@@ -61,33 +58,33 @@ class Grid:
         print(self.H, self.B, self.nH, self.nB, self.nE, self.xH, self.yB)
 
     def createNodes(self):
-        self.x=0
-        self.y=0
+        x=0
+        y=0
         for i in range(self.nH - 1):
-            self.nodes.append(Node(self.x * self.xH, self.y * self.yB))
+            self.nodes.append(Node(x * self.xH, y * self.yB))
             for j in range(self.nB):
-                self.y += 1
-                self.nodes.append(Node(self.x * self.xH, self.y * self.yB))
-            self.x += 1
-            self.y = 0
+                y += 1
+                self.nodes.append(Node(x * self.xH, y * self.yB))
+            x += 1
+            y = 0
 
     def createCoordinatedNodes(self):
-        self.x = 0
-        self.y = 0
-        #creating second list of objects but with x y coordinates
+        x = 0
+        y = 0
+        # creating second list of objects but with x y coordinates
         for i in range(self.nH - 1):
-            self.nodesCoordinated.append(Node(self.x, self.y))
+            self.nodesCoordinated.append(Node(x, y))
             for j in range(self.nB):
-                self.y += 1
-                self.nodesCoordinated.append(Node(self.x, self.y))
-            self.x += 1
-            self.y = 0
+                y += 1
+                self.nodesCoordinated.append(Node(x, y))
+            x += 1
+            y = 0
+
 
     def createElements(self):
         ID=1
         a=0
         for i in range(self.nE):
-
             ID1 = ID + a
             ID2 = ID1 + self.nH
             ID3 = ID2 + 1
@@ -107,15 +104,11 @@ class Grid:
 
 
 def main():
-    c = Grid(0.2, 0.1, 5, 4)
+    c = Grid(0.8, 0.5, 4, 3)
     # c.printGridData()
     print(c.nodes)
     print(c.nodesCoordinated)
     c.printElements()
 
-
-# ZROBIONE WYSWIETLANIE NODOW, ZOSTAJA ELEMENTY I PRZEKONWERTOWANIE NODOW NA FAKTYCZNY DYSTANS
-# do dupy zrobione, nie chciałem w dwóch osobnych metodach to robić ale już chuj
-# trzy razy x i y resetuję, też robota godna indyjskiego helpdesku ale w sumie to działa
 if __name__ == '__main__':
     main()
