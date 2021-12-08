@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/kustra.iml" filepath="$PROJECT_DIR$/.idea/kustra.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/mes.iml" filepath="$PROJECT_DIR$/.idea/mes.iml" />
     </modules>
   </component>
 </project>

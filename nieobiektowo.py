@@ -37,10 +37,10 @@ def Elements(nE,nH):
     return elements
 
 def Grid_data():
-    H=0.2
-    B=0.1
-    nH=5
-    nB=4
+    H=0.8
+    B=0.5
+    nH=4
+    nB=3
     amount=nH*nB
     nE=(nH-1)*(nB-1)
     return nH,nB,amount, nE

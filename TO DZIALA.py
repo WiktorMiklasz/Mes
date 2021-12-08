@@ -19,6 +19,10 @@ class Node:
 class Element:
     IDn = [0, 0, 0, 0]
     ID = 1
+    H =   [[0, 0, 0, 0],
+           [0, 0, 0, 0],
+           [0, 0, 0, 0],
+           [0, 0, 0, 0]]
 
     def __init__(self, IDn, ID=1):
         self.ID = ID
@@ -132,11 +136,13 @@ def wynikPochodnej():
 def calculateMatrix(ksi, eta, grid):
     for i in range(0, grid.nE):
         for j in range(0, 4):
-            print("\nNumer elementu:", i, " Punkt calkowania:", j, "\n")
-            matrix, matrixInv = jakobian(i, j, ksi, eta, grid)
-            print("----------------------------------------------------------------\n", matrix, "\n",
-                  "----------------------------------------------------------------\n", matrixInv,
-                  "\n----------------------------------------------------------------")
+            # print("\nNumer elementu:", i, " Punkt calkowania:", j, "\n")
+            matrix, matrixInv, detJ = jakobian(i, j, ksi, eta, grid)
+            # print("--------------------------------------------------------------------------------\n", matrix, "\n",
+            #       "-------------------------------------------------------------------------------\n", matrixInv,
+            #       "\n--------------------------------------------------------------------------------")
+
+    return matrix, matrixInv, detJ
 
 
 def jakobian(i, j, ksi, eta, grid):
@@ -148,8 +154,8 @@ def jakobian(i, j, ksi, eta, grid):
     node2 = grid.elements[i].IDn[1]
     node3 = grid.elements[i].IDn[2]
     node4 = grid.elements[i].IDn[3]
-    print("ID wierzcholkow:")
-    print("/////////////////\n", node1, node2, node3, node4, "\n/////////////////\n")
+    #print("ID wierzcholkow:")
+    #print("/////////////////\n", node1, node2, node3, node4, "\n/////////////////\n")
 
     # 0 0 to pochodna x po ksi
     matrix[0][0] = ksi[j][0] * grid.nodes[node1 - 1].x + ksi[j][1] * grid.nodes[node2 - 1].x + ksi[j][2] * grid.nodes[
@@ -176,17 +182,85 @@ def jakobian(i, j, ksi, eta, grid):
     matrixInv[0][1] *= 1 / detJ
     matrixInv[1][0] *= 1 / detJ
     matrixInv[1][1] *= 1 / detJ
-    return matrix, matrixInv
+    return matrix, matrixInv, detJ
+
+def calculatePC(ksi,eta,matrixInv):
+    dNdX = [[0, 0, 0, 0],
+           [0, 0, 0, 0],
+           [0, 0, 0, 0],
+           [0, 0, 0, 0]]
+    dNdY =[[0, 0, 0, 0],
+           [0, 0, 0, 0],
+           [0, 0, 0, 0],
+           [0, 0, 0, 0]]
+    for i in range(0,4):
+        dNdX[i][0] = matrixInv[0][0]*ksi[i][0]+matrixInv[0][1]*eta[i][0]
+        dNdX[i][1] = matrixInv[0][0]*ksi[i][1]+matrixInv[0][1]*eta[i][1]
+        dNdX[i][2] = matrixInv[0][0]*ksi[i][2]+matrixInv[0][1]*eta[i][2]
+        dNdX[i][3] = matrixInv[0][0]*ksi[i][3]+matrixInv[0][1]*eta[i][3]
+
+        dNdY[i][0] = matrixInv[1][0] * ksi[i][0] + matrixInv[1][1] * eta[i][0]
+        dNdY[i][1] = matrixInv[1][0] * ksi[i][1] + matrixInv[1][1] * eta[i][1]
+        dNdY[i][2] = matrixInv[1][0] * ksi[i][2] + matrixInv[1][1] * eta[i][2]
+        dNdY[i][3] = matrixInv[1][0] * ksi[i][3] + matrixInv[1][1] * eta[i][3]
+    return dNdX, dNdY
+def calculateMatrixHforPC(dNdX,dNdY, H1, H2):
+    HX = [[0, 0, 0, 0],
+          [0, 0, 0, 0],
+          [0, 0, 0, 0],
+          [0, 0, 0, 0]]
+    HY = [[0, 0, 0, 0],
+          [0, 0, 0, 0],
+          [0, 0, 0, 0],
+          [0, 0, 0, 0]]
+
+    for i in range(0,4):
+        for j in range(0,4):
+            HX[i][j] = dNdX[j]*dNdX[i]
+            HY[i][j] = dNdY[j] * dNdY[i]
+    H1+=HX
+    H2+=HY
+
+# cos zle, todo
+    return H1, H2
+
+def calculateH(H1,H2,detJ):
+    H=[[0 for _ in range(4)]for _ in range(16)]
+    result=[[0 for _ in range(4)]for _ in range(4)]
+    for i in range(0,16):
+        for j in range (0,4):
+            H[i][j]=30*(H1[i][j]+H2[i][j])*detJ
+            # 0.000156 dla zadania z zajec zamiast detJ
+
+    for i in range (0,4):
+        for j in range(0, 4):
+            result[i][j]=H[i][j]+H[i+4][j]+H[i+8][j]+H[i+12][j]
+    print(result)
+    return result
+
 
 
 def main():
     c = Grid(0.5, 0.1, 5, 4)
-    # c.printGridData()
     print(c.nodes)
     # print(c.nodesCoordinated)
-    c.printElements()
+    #c.printElements()
     ksi, eta = wynikPochodnej()
-    calculateMatrix(ksi, eta, c)
+    matrix, matrixInv, detJ=calculateMatrix(ksi, eta, c)
+    # odkomentowac przy faktycznym budowaniu siatki
+    # dla niegenerowania siatki na latwizne mozna sama macierz inv wklepac
+    # matrixInv=[[80,0],[0,80]]
+    dNdX, dNdY=  calculatePC(ksi, eta, matrixInv)
+    print("\ndNdX i dNdY:")
+    print(dNdX)
+    print("\n", dNdY)
+    print("\nMacierz H:")
+    H1=[]
+    H2=[]
+    for i in range(0,4):
+        H1, H2=calculateMatrixHforPC(dNdX[i],dNdY[i],H1, H2)
+    H=calculateH(H1,H2, detJ)
+
 
 
 if __name__ == '__main__':
