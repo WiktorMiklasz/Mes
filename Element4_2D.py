@@ -4,44 +4,27 @@ import math
 class Element4_2D:
     ksi = []
     eta = []
-    west = []
-    east = []
-    north = []
-    south = []
+    left = []
+    right = []
+    top = []
+    bottom = []
 
     def __init__(self):
-        self.ksi = [[0, 0, 0, 0],
-                    [0, 0, 0, 0],
-                    [0, 0, 0, 0],
-                    [0, 0, 0, 0]]
-        self.eta = [[0, 0, 0, 0],
-                    [0, 0, 0, 0],
-                    [0, 0, 0, 0],
-                    [0, 0, 0, 0]]
-        self.north = [[0, 0, 0, 0],
-                      [0, 0, 0, 0],
-                      [0, 0, 0, 0],
-                      [0, 0, 0, 0]]
-        self.west = [[0, 0, 0, 0],
-                     [0, 0, 0, 0],
-                     [0, 0, 0, 0],
-                     [0, 0, 0, 0]]
-        self.east = [[0, 0, 0, 0],
-                     [0, 0, 0, 0],
-                     [0, 0, 0, 0],
-                     [0, 0, 0, 0]]
-        self.south = [[0, 0, 0, 0],
-                      [0, 0, 0, 0],
-                      [0, 0, 0, 0],
-                      [0, 0, 0, 0]]
+        self.ksi = [[0 for _ in range(4)] for _ in range(4)]
+        self.eta = [[0 for _ in range(4)] for _ in range(4)]
+        self.top = [[0 for _ in range(4)] for _ in range(4)]
+        self.left = [[0 for _ in range(4)] for _ in range(4)]
+        self.right = [[0 for _ in range(4)] for _ in range(4)]
+        self.bottom = [[0 for _ in range(4)] for _ in range(4)]
+
         self.points = [[-1 / math.sqrt(3), -1 / math.sqrt(3)], [1 / math.sqrt(3), -1 / math.sqrt(3)],
                        [1 / math.sqrt(3), 1 / math.sqrt(3)], [-1 / math.sqrt(3), 1 / math.sqrt(3)]]
         self.points2 = [-1 / math.sqrt(3), 1 / math.sqrt(3)]
         self.calculateDeriatives()
-        print("north:", self.north)
-        print("south:", self.south)
-        print("west:", self.west)
-        print("east:", self.east)
+        print("north:", self.top)
+        print("south:", self.bottom)
+        print("west:", self.left)
+        print("east:", self.right)
 
     def calculateDeriatives(self):
         col = len(self.ksi[0])
@@ -60,28 +43,28 @@ class Element4_2D:
         print(self.eta)
         for i in range(2):  # 2 bo tyle punktow calkowania
 
-            ksiWest = -1
-            ksiEast = 1
-            etaNorth = 1
-            etaSouth = -1
+            ksiLeft = -1
+            ksiRight = 1
+            etaTop = 1
+            etaBottom = -1
 
             # obliczanie sumy wartosci funkcji ksztaltu dla scian
-            self.north[i][0] = 0.25 * (1.0 - self.points2[i]) * (1.0 - etaNorth)
-            self.north[i][1] = 0.25 * (1.0 + self.points2[i]) * (1.0 - etaNorth)
-            self.north[i][2] = 0.25 * (1.0 + self.points2[i]) * (1.0 + etaNorth)
-            self.north[i][3] = 0.25 * (1.0 - self.points2[i]) * (1.0 + etaNorth)
+            self.top[i][0] = 0.25 * (1.0 - self.points2[i]) * (1.0 - etaTop)
+            self.top[i][1] = 0.25 * (1.0 + self.points2[i]) * (1.0 - etaTop)
+            self.top[i][2] = 0.25 * (1.0 + self.points2[i]) * (1.0 + etaTop)
+            self.top[i][3] = 0.25 * (1.0 - self.points2[i]) * (1.0 + etaTop)
 
-            self.south[i][0] = 0.25 * (1.0 - self.points2[i]) * (1.0 - etaSouth)
-            self.south[i][1] = 0.25 * (1.0 + self.points2[i]) * (1.0 - etaSouth)
-            self.south[i][2] = 0.25 * (1.0 + self.points2[i]) * (1.0 + etaSouth)
-            self.south[i][3] = 0.25 * (1.0 - self.points2[i]) * (1.0 + etaSouth)
+            self.bottom[i][0] = 0.25 * (1.0 - self.points2[i]) * (1.0 - etaBottom)
+            self.bottom[i][1] = 0.25 * (1.0 + self.points2[i]) * (1.0 - etaBottom)
+            self.bottom[i][2] = 0.25 * (1.0 + self.points2[i]) * (1.0 + etaBottom)
+            self.bottom[i][3] = 0.25 * (1.0 - self.points2[i]) * (1.0 + etaBottom)
 
-            self.east[i][0] = 0.25 * (1.0 - self.points2[i]) * (1.0 - ksiEast)
-            self.east[i][1] = 0.25 * (1.0 - self.points2[i]) * (1.0 + ksiEast)
-            self.east[i][2] = 0.25 * (1.0 + self.points2[i]) * (1.0 + ksiEast)
-            self.east[i][3] = 0.25 * (1.0 + self.points2[i]) * (1.0 - ksiEast)
+            self.right[i][0] = 0.25 * (1.0 - self.points2[i]) * (1.0 - ksiRight)
+            self.right[i][1] = 0.25 * (1.0 - self.points2[i]) * (1.0 + ksiRight)
+            self.right[i][2] = 0.25 * (1.0 + self.points2[i]) * (1.0 + ksiRight)
+            self.right[i][3] = 0.25 * (1.0 + self.points2[i]) * (1.0 - ksiRight)
 
-            self.west[i][0] = 0.25 * (1.0 - self.points2[i]) * (1.0 - ksiWest)
-            self.west[i][1] = 0.25 * (1.0 - self.points2[i]) * (1.0 + ksiWest)
-            self.west[i][2] = 0.25 * (1.0 + self.points2[i]) * (1.0 + ksiWest)
-            self.west[i][3] = 0.25 * (1.0 + self.points2[i]) * (1.0 - ksiWest)
+            self.left[i][0] = 0.25 * (1.0 - self.points2[i]) * (1.0 - ksiLeft)
+            self.left[i][1] = 0.25 * (1.0 - self.points2[i]) * (1.0 + ksiLeft)
+            self.left[i][2] = 0.25 * (1.0 + self.points2[i]) * (1.0 + ksiLeft)
+            self.left[i][3] = 0.25 * (1.0 + self.points2[i]) * (1.0 - ksiLeft)

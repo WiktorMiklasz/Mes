@@ -1,14 +1,8 @@
 class Element:
-    IDn = [0, 0, 0, 0]
+    IDn = [0 for _ in range(4)]
     ID = 1
-    H = [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [0, 0, 0, 0]]
-    Hbc = [[0, 0, 0, 0],
-           [0, 0, 0, 0],
-           [0, 0, 0, 0],
-           [0, 0, 0, 0]]
+    H = [[0 for _ in range(4)] for _ in range(4)]
+    Hbc = [[0 for _ in range(4)] for _ in range(4)]
 
     def __init__(self, IDn, ID=1):
         self.ID = ID

@@ -9,10 +9,8 @@ def calculate(ksi, eta, grid, element):
     global matrixInv, matrix, detJ
     H1 = []
     H2 = []
-    a = [[0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [0, 0, 0, 0],
-         [0, 0, 0, 0]]
+    a = [[0 for _ in range(4)] for _ in range(4)]
+    t = 300
     for i in range(0, grid.nE):
         for j in range(0, 4):
             # print("\nNumer elementu:", i, " Punkt calkowania:", j, "\n")
@@ -24,15 +22,13 @@ def calculate(ksi, eta, grid, element):
         pc1, pc2 = calculateHbc(grid, element, i)
         for j in range(4):
             for k in range(4):
-                a[j][k] = 300 * (pc1[j][k] + pc2[j][k])
+                a[j][k] = t * (pc1[j][k] + pc2[j][k])
         print(a)
 
 
 def jakobian(i, j, ksi, eta, grid):
-    matrix = [[0, 0],
-              [0, 0]]
-    matrixInv = [[0, 0],
-                 [0, 0]]
+    matrix = [[0 for _ in range(2)] for _ in range(2)]
+    matrixInv = [[0 for _ in range(2)] for _ in range(2)]
     node1 = grid.elements[i].IDn[0]
     node2 = grid.elements[i].IDn[1]
     node3 = grid.elements[i].IDn[2]
@@ -69,14 +65,9 @@ def jakobian(i, j, ksi, eta, grid):
 
 
 def calculatePC(ksi, eta, matrixInv):
-    dNdX = [[0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]]
-    dNdY = [[0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0]]
+    dNdX = [[0 for _ in range(4)] for _ in range(4)]
+    dNdY = [[0 for _ in range(4)] for _ in range(4)]
+
     for i in range(0, 4):
         dNdX[i][0] = matrixInv[0][0] * ksi[i][0] + matrixInv[0][1] * eta[i][0]
         dNdX[i][1] = matrixInv[0][0] * ksi[i][1] + matrixInv[0][1] * eta[i][1]
@@ -91,14 +82,8 @@ def calculatePC(ksi, eta, matrixInv):
 
 
 def calculateMatrixHforPC(dNdX, dNdY, H1, H2):
-    HX = [[0, 0, 0, 0],
-          [0, 0, 0, 0],
-          [0, 0, 0, 0],
-          [0, 0, 0, 0]]
-    HY = [[0, 0, 0, 0],
-          [0, 0, 0, 0],
-          [0, 0, 0, 0],
-          [0, 0, 0, 0]]
+    HX = [[0 for _ in range(4)] for _ in range(4)]
+    HY = [[0 for _ in range(4)] for _ in range(4)]
 
     for i in range(0, 4):
         for j in range(0, 4):
@@ -129,14 +114,8 @@ def calculateH(H1, H2, detJ):
 
 
 def calculateHbc(grid, element, i):
-    pc1 = [[0, 0, 0, 0],
-           [0, 0, 0, 0],
-           [0, 0, 0, 0],
-           [0, 0, 0, 0]]
-    pc2 = [[0, 0, 0, 0],
-           [0, 0, 0, 0],
-           [0, 0, 0, 0],
-           [0, 0, 0, 0]]
+    pc1 = [[0 for _ in range(4)] for _ in range(4)]
+    pc2 = [[0 for _ in range(4)] for _ in range(4)]
     node1 = grid.elements[i].IDn[0]
     node2 = grid.elements[i].IDn[1]
     node3 = grid.elements[i].IDn[2]
@@ -149,8 +128,8 @@ def calculateHbc(grid, element, i):
         for j in range(4):
             for k in range(4):
                 dJ = grid.xB / 2
-                pc1[j][k] += element.south[0][k] * element.south[0][j] * dJ
-                pc2[j][k] += element.south[1][k] * element.south[1][j] * dJ
+                pc1[j][k] += element.bottom[0][k] * element.bottom[0][j] * dJ
+                pc2[j][k] += element.bottom[1][k] * element.bottom[1][j] * dJ
     if grid.nodes[node1 - 1].flag == 1 and grid.nodes[node4 - 1].flag == 1:
         # lewa sciana
         # print("Number of element:", i)
@@ -158,8 +137,8 @@ def calculateHbc(grid, element, i):
         for j in range(4):
             for k in range(4):
                 dJ = grid.yH / 2
-                pc1[j][k] += element.west[0][k] * element.west[0][j] * dJ
-                pc2[j][k] += element.west[1][k] * element.west[1][j] * dJ
+                pc1[j][k] += element.left[0][k] * element.left[0][j] * dJ
+                pc2[j][k] += element.left[1][k] * element.left[1][j] * dJ
     if grid.nodes[node2 - 1].flag == 1 and grid.nodes[node3 - 1].flag == 1:
         # prawa sciana
         # print("Number of element:", i)
@@ -167,8 +146,8 @@ def calculateHbc(grid, element, i):
         for j in range(4):
             for k in range(4):
                 dJ = grid.yH / 2
-                pc1[j][k] += element.east[0][k] * element.east[0][j] * dJ
-                pc2[j][k] += element.east[1][k] * element.east[1][j] * dJ
+                pc1[j][k] += element.right[0][k] * element.right[0][j] * dJ
+                pc2[j][k] += element.right[1][k] * element.right[1][j] * dJ
     if grid.nodes[node3 - 1].flag == 1 and grid.nodes[node4 - 1].flag == 1:
         # gorna sciana
         # print("Number of element:", i)
@@ -176,17 +155,17 @@ def calculateHbc(grid, element, i):
         for j in range(4):
             for k in range(4):
                 dJ = grid.xB / 2
-                pc1[j][k] += element.north[0][k] * element.north[0][j] * dJ
-                pc2[j][k] += element.north[1][k] * element.north[1][j] * dJ
+                pc1[j][k] += element.top[0][k] * element.top[0][j] * dJ
+                pc2[j][k] += element.top[1][k] * element.top[1][j] * dJ
     return pc1, pc2
 
 
 
 
 def main():
-    c = Grid(0.1, 0.1, 4, 4)
+    c = Grid(0.1, 0.1, 3, 3)
     print(c.nodes)
-    c.printFlag()
+    #c.printFlag()
     c.printElements()
     element = Element4_2D()
     calculate(element.ksi, element.eta, c, element)

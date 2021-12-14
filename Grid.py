@@ -14,14 +14,8 @@ class Grid:
         self.nB = xB
         self.amount = self.nH * self.nB
         self.nE = (self.nH - 1) * (self.nB - 1)
-        if self.nH != 1:
-            self.yH = self.H / (self.nH - 1)
-        else:
-            self.yH = self.H
-        if self.nB != 1:
-            self.xB = self.B / (self.nB - 1)
-        else:
-            self.xB = self.B
+        self.yH = self.H / (self.nH - 1)
+        self.xB = self.B / (self.nB - 1)
         self.createNodes()
         self.checkFlag()
         # self.createCoordinatedNodes()
@@ -50,12 +44,12 @@ class Grid:
             ID2 = ID1 + self.nH
             ID3 = ID2 + 1
             ID4 = ID1 + 1
-            if (ID1 % self.nH == 0):
+            if ID1 % self.nH == 0:
                 ID1 += 1
                 ID2 += 1
                 ID3 += 1
                 ID4 += 1
-                a += 1  # to jest inkrement w zależności od tego w której kolumnie tworzone są elementy
+                a += 1  # to jest inkrement w zaleznosci od tego w której kolumnie tworzone są elementy
             IDn = [ID1, ID2, ID3, ID4]
             self.elements.append(Element(IDn, ID))
             ID += 1
@@ -66,8 +60,8 @@ class Grid:
                 self.nodes[i].flag = 1
 
     def printElements(self):
-        for i in self.elements:
-            print(i)
+        for element in self.elements:
+            print(element)
 
     def printFlag(self):
         for i in range(len(self.nodes)):
