@@ -3,6 +3,8 @@ class Element:
     ID = 1
     H = [[0 for _ in range(4)] for _ in range(4)]
     Hbc = [[0 for _ in range(4)] for _ in range(4)]
+    aggrH = [[0 for _ in range(4)] for _ in range(4)]
+    P = [0 for _ in range(4)]
 
     def __init__(self, IDn, ID=1):
         self.ID = ID

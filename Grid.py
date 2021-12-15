@@ -21,10 +21,6 @@ class Grid:
         # self.createCoordinatedNodes()
         self.createElements()
 
-    def printGridData(self):
-        # debug only
-        print(self.H, self.B, self.nH, self.nB, self.nE, self.yH, self.xB)
-
     def createNodes(self):
         for i in range(self.nB):
             # self.nodes.append(Node(i * self.xB, j * self.yH))
