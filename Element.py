@@ -5,6 +5,8 @@ class Element:
     Hbc = [[0 for _ in range(4)] for _ in range(4)]
     aggrH = [[0 for _ in range(4)] for _ in range(4)]
     P = [0 for _ in range(4)]
+    C = [0 for _ in range(4)]
+    #dla trojpunktowego c bedzie 9 na 4
 
     def __init__(self, IDn, ID=1):
         self.ID = ID

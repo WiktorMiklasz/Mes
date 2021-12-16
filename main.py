@@ -1,12 +1,13 @@
 from Element4_2D import Element4_2D
 from Grid import Grid
+import numpy as np
 
 
 def calculate(ksi, eta, grid, element):
     # GLOWNA FUNKCJA OBLICZENIOWA
     # dla niegenerowania siatki mozna sama macierz inv wklepac +detJ gotowe
     # matrixInv=[[80,0],[0,80]]
-    global matrixInv, matrix, detJ, PGlobal, HGlobal
+    global matrixInv, detJ, PGlobal, HGlobal
     H1 = []
     H2 = []
     Hbc = [[0 for _ in range(4)] for _ in range(4)]
@@ -15,12 +16,14 @@ def calculate(ksi, eta, grid, element):
     PGlobal = [0 for _ in range(grid.amount)]
     HGlobal = [[0 for _ in range(grid.amount)] for _ in range(grid.amount)]
     for i in range(grid.nE):
+        CLocal = [[0 for _ in range(4)] for _ in range(4)]
         for j in range(4):
             # print("\nNumer elementu:", i, " Punkt calkowania:", j, "\n")
             matrixInv, detJ = jakobian(i, j, ksi, eta, grid)
             # detJ wykorzystywane w macierzy H
             dNdX, dNdY = calculatePC(ksi, eta)
             H1, H2 = calculateMatrixHforPC(dNdX[j], dNdY[j], H1, H2)
+            calculateC(j, element, CLocal)
         grid.elements[i].H = calculateH(H1, H2)
         pc1, pc2, p1, p2 = calculateHbcAndP(grid, element, i)
         for j in range(4):
@@ -31,12 +34,13 @@ def calculate(ksi, eta, grid, element):
         grid.elements[i].Hbc = Hbc
         grid.elements[i].aggrH = Hlocal
         grid.elements[i].P = Plocal
+        grid.elements[i].C = CLocal
         print("Number of element ", i + 1)
         print("\nHbc:\n", Hbc)
         print("\naggregatedH:\n", Hlocal)
         print("\nWektor P:\n", Plocal)
         aggregationGlobal(grid, i)
-    print("H Globalne:\n", HGlobal, "\nP Globalne: \n", PGlobal)
+        print("\nMacierz C lokalna:\n", CLocal)
 
 
 def jakobian(i, j, ksi, eta, grid):
@@ -185,23 +189,35 @@ def calculateHbcAndP(grid, element, i):
 
 
 def aggregationGlobal(grid, i):
-        for j in range(4):
-            for k in range(4):
-                HGlobal[grid.elements[i].IDn[j]-1][grid.elements[i].IDn[k]-1] += grid.elements[i].aggrH[j][k]
-            PGlobal[grid.elements[i].IDn[j]-1] += grid.elements[i].P[j]
-        return HGlobal, PGlobal
+    for j in range(4):
+        for k in range(4):
+            HGlobal[grid.elements[i].IDn[j] - 1][grid.elements[i].IDn[k] - 1] += grid.elements[i].aggrH[j][k]
+        PGlobal[grid.elements[i].IDn[j] - 1] += grid.elements[i].P[j]
+    return HGlobal, PGlobal
 
+
+def calculateC(j, element, CLocal):
+    #J - Punkt calkowania
+    #K - przechodzenie po kolumnach
+    #l - przechodzenie po wierszach
+    for k in range(4):
+        for l in range(4):
+            CLocal[k][l] += c * ro * detJ * element.N[j][k] * element.N[j][l]
+    return CLocal
 
 def main():
-    global t, alpha
-    c = Grid(0.1, 0.1, 4, 4)
+    global t, alpha, c, ro
+    grid = Grid(0.1, 0.1, 4, 4)
+    c = 700
+    ro = 7800
     alpha = 300
     t = 1200
-    print(c.nodes)
+    print(grid.nodes)
     # c.printFlag()
-    c.printElements()
+    grid.printElements()
     element = Element4_2D()
-    calculate(element.ksi, element.eta, c, element)
+    calculate(element.ksi, element.eta, grid, element)
+    print("H Globalne:\n", HGlobal, "\nP Globalne: \n", PGlobal)
 
 
 if __name__ == '__main__':

@@ -8,6 +8,7 @@ class Element4_2D:
     right = []
     top = []
     bottom = []
+    N = []
 
     def __init__(self):
         self.ksi = [[0 for _ in range(4)] for _ in range(4)]
@@ -16,15 +17,25 @@ class Element4_2D:
         self.left = [[0 for _ in range(4)] for _ in range(4)]
         self.right = [[0 for _ in range(4)] for _ in range(4)]
         self.bottom = [[0 for _ in range(4)] for _ in range(4)]
+        self.N = [[0 for _ in range(4)] for _ in range(4)]
 
         self.points = [[-1 / math.sqrt(3), -1 / math.sqrt(3)], [1 / math.sqrt(3), -1 / math.sqrt(3)],
                        [1 / math.sqrt(3), 1 / math.sqrt(3)], [-1 / math.sqrt(3), 1 / math.sqrt(3)]]
         self.points2 = [-1 / math.sqrt(3), 1 / math.sqrt(3)]
         self.calculateDeriatives()
+        self.calculateNforC()
         print("north:", self.top)
         print("south:", self.bottom)
         print("west:", self.left)
         print("east:", self.right)
+
+    def calculateNforC(self):
+        for i in range(4):
+            #wykorzystanie punktow calkowania i liczenie funkcji ksztaltu dla tych punktow, nie pochodnych
+            self.N[i][0] = 0.25 * (1 - self.points[i][0]) * (1 - self.points[i][1])
+            self.N[i][1] = 0.25 * (1 + self.points[i][0]) * (1 - self.points[i][1])
+            self.N[i][2] = 0.25 * (1 + self.points[i][0]) * (1 + self.points[i][1])
+            self.N[i][3] = 0.25 * (1 - self.points[i][0]) * (1 + self.points[i][1])
 
     def calculateDeriatives(self):
         col = len(self.ksi[0])
