@@ -233,8 +233,6 @@ def iteration(grid, t0):
     print(f'Minimum: {min(t0)}, Max: {max(t0)},\n')
     iterations = int(time / dt)
     for i in range(iterations - 1):
-       # for j in range(grid.nE):
-           # aggregationGlobal(grid, j)  # na zajeciach to olewamy, ja tez tak postapie. Jak pan Jezus powiedzial.
         sumHandC()
         print(f't0: {t0} \n')
         sumCP = sumCandP(t0)
@@ -246,7 +244,6 @@ def iteration(grid, t0):
 
 def main():
     global t, alpha, c, ro, dt, time, con
-    # zmienne globalne to gowno a python ssie chujA
     grid = Grid(0.1, 0.1, 4, 4)
     c = 700  # cieplo wlasciwe
     ro = 7800  # gęstosc
