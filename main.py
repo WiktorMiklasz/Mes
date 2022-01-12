@@ -3,11 +3,12 @@ from Grid import Grid
 import numpy as np
 
 
-def calculate(ksi, eta, grid, element):
+def calculate(ksi, eta, grid, element, t0):
     # GLOWNA FUNKCJA OBLICZENIOWA
     # dla niegenerowania siatki mozna sama macierz inv wklepac +detJ gotowe
     # matrixInv=[[80,0],[0,80]]
-    global matrixInv, detJ, PGlobal, HGlobal
+    global matrixInv, detJ, PGlobal, HGlobal, CGlobal, sumHC
+    # HC to zagregowane H i C, CP to zagregowane C i P
     H1 = []
     H2 = []
     Hbc = [[0 for _ in range(4)] for _ in range(4)]
@@ -15,6 +16,8 @@ def calculate(ksi, eta, grid, element):
     Plocal = [0 for _ in range(4)]
     PGlobal = [0 for _ in range(grid.amount)]
     HGlobal = [[0 for _ in range(grid.amount)] for _ in range(grid.amount)]
+    CGlobal = [[0 for _ in range(grid.amount)] for _ in range(grid.amount)]
+    sumHC = [[0 for _ in range(grid.amount)] for _ in range(grid.amount)]
     for i in range(grid.nE):
         CLocal = [[0 for _ in range(4)] for _ in range(4)]
         for j in range(4):
@@ -41,6 +44,10 @@ def calculate(ksi, eta, grid, element):
         print("\nWektor P:\n", Plocal)
         aggregationGlobal(grid, i)
         print("\nMacierz C lokalna:\n", CLocal)
+    sumHandC()
+    #sumCP = PGlobal.copy()
+    sumCandP(t0)
+    iteration(grid, t0)
 
 
 def jakobian(i, j, ksi, eta, grid):
@@ -120,7 +127,7 @@ def calculateH(H1, H2):
     result = [[0 for _ in range(4)] for _ in range(4)]
     for i in range(0, 16):
         for j in range(0, 4):
-            H[i][j] = 25 * (H1[i][j] + H2[i][j]) * detJ
+            H[i][j] = con * (H1[i][j] + H2[i][j]) * detJ
             # 0.000156 dla zadania z zajec zamiast detJ
 
     for i in range(0, 4):
@@ -188,39 +195,78 @@ def calculateHbcAndP(grid, element, i):
     return pc1, pc2, p1, p2
 
 
-def aggregationGlobal(grid, i):
-    for j in range(4):
-        for k in range(4):
-            HGlobal[grid.elements[i].IDn[j] - 1][grid.elements[i].IDn[k] - 1] += grid.elements[i].aggrH[j][k]
-        PGlobal[grid.elements[i].IDn[j] - 1] += grid.elements[i].P[j]
-    return HGlobal, PGlobal
-
-
 def calculateC(j, element, CLocal):
-    #J - Punkt calkowania
-    #K - przechodzenie po kolumnach
-    #l - przechodzenie po wierszach
+    # J - Punkt calkowania
+    # K - przechodzenie po kolumnach
+    # l - przechodzenie po wierszach
     for k in range(4):
         for l in range(4):
             CLocal[k][l] += c * ro * detJ * element.N[j][k] * element.N[j][l]
     return CLocal
 
+
+def aggregationGlobal(grid, i):
+    for j in range(4):
+        for k in range(4):
+            HGlobal[grid.elements[i].IDn[j] - 1][grid.elements[i].IDn[k] - 1] += grid.elements[i].aggrH[j][k]
+            CGlobal[grid.elements[i].IDn[j] - 1][grid.elements[i].IDn[k] - 1] += grid.elements[i].C[j][k]
+        PGlobal[grid.elements[i].IDn[j] - 1] += grid.elements[i].P[j]
+
+
+def sumHandC():
+    for i in range(len(HGlobal)):
+        for j in range(len(HGlobal)):
+            sumHC[i][j] = HGlobal[i][j] + CGlobal[i][j] / dt
+
+
+def sumCandP(t0):
+    sumCP = PGlobal.copy()
+    for i in range(len(PGlobal)):
+        for j in range(len(PGlobal)):
+            sumCP[i] += CGlobal[i][j] / dt * t0[j]
+    return sumCP
+
+
+def iteration(grid, t0):
+    sumCP = sumCandP(t0)
+    t0 = np.linalg.solve(sumHC, sumCP)
+    print(f'Minimum: {min(t0)}, Max: {max(t0)},\n')
+    iterations = int(time / dt)
+    for i in range(iterations - 1):
+       # for j in range(grid.nE):
+           # aggregationGlobal(grid, j)  # na zajeciach to olewamy, ja tez tak postapie. Jak pan Jezus powiedzial.
+        sumHandC()
+        print(f't0: {t0} \n')
+        sumCP = sumCandP(t0)
+        print(f'wartosc wektora cp: {sumCP} ')
+        t0 = np.linalg.solve(sumHC, sumCP)
+        print(f'Numer iteracji: {i+1}, Minimum: {min(t0)}, Max: {max(t0)},\n')
+
+
+
 def main():
-    global t, alpha, c, ro
+    global t, alpha, c, ro, dt, time, con
+    # zmienne globalne to gowno a python ssie chujA
     grid = Grid(0.1, 0.1, 4, 4)
-    c = 700
-    ro = 7800
-    alpha = 300
-    t = 1200
+    c = 700  # cieplo wlasciwe
+    ro = 7800  # gęstosc
+    alpha = 300  # wspolczynnik przewodzenia ciepla
+    t = 1200  # temperatura otoczenia
+    dt = 50  # krok czasowy
+    time = 500
+    con = 25
+    t0 = [100 for _ in range(grid.amount)]  # wektor temperatur poczatkowych
     print(grid.nodes)
     # c.printFlag()
     grid.printElements()
     element = Element4_2D()
-    calculate(element.ksi, element.eta, grid, element)
-    print("H Globalne:\n", HGlobal, "\nP Globalne: \n", PGlobal)
+    calculate(element.ksi, element.eta, grid, element, t0)
+    print(f'H Globalne:\n {HGlobal} \nP Globalne: \n {PGlobal} \n C Globalne: \n {CGlobal}')
+    print("\n Suma H i C:\n", sumHC)
+    #print("\n Suma C i P:\n", sumCP)
 
 
 if __name__ == '__main__':
     main()
-    # left to do: walls, vector p, aggregation
+
     # no 3 point integration yet
