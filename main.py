@@ -1,6 +1,10 @@
+import math
+
 from Element4_2D import Element4_2D
 from Grid import Grid
 import numpy as np
+from Node import Node
+from Element import Element
 
 
 def calculate(ksi, eta, grid, element, t0):
@@ -38,16 +42,17 @@ def calculate(ksi, eta, grid, element, t0):
         grid.elements[i].aggrH = Hlocal
         grid.elements[i].P = Plocal
         grid.elements[i].C = CLocal
+        aggregationGlobal(grid, i)
         print("Number of element ", i + 1)
         print("\nHbc:\n", Hbc)
         print("\naggregatedH:\n", Hlocal)
-        print("\nWektor P:\n", Plocal)
-        aggregationGlobal(grid, i)
-        print("\nMacierz C lokalna:\n", CLocal)
+        # print("\nCzyste H:\n", grid.elements[i].H)
+        # print("\nWektor P:\n", Plocal)
+        # print("\nMacierz C lokalna:\n", CLocal)
+    # iteracja 0
     sumHandC()
-    #sumCP = PGlobal.copy()
     sumCandP(t0)
-    iteration(grid, t0)
+    iteration(t0)
 
 
 def jakobian(i, j, ksi, eta, grid):
@@ -119,16 +124,12 @@ def calculateMatrixHforPC(dNdX, dNdY, H1, H2):
     return H1, H2
 
 
-# def calculateHBC():
-
-
 def calculateH(H1, H2):
     H = [[0 for _ in range(4)] for _ in range(16)]
     result = [[0 for _ in range(4)] for _ in range(4)]
     for i in range(0, 16):
         for j in range(0, 4):
             H[i][j] = con * (H1[i][j] + H2[i][j]) * detJ
-            # 0.000156 dla zadania z zajec zamiast detJ
 
     for i in range(0, 4):
         for j in range(0, 4):
@@ -151,9 +152,10 @@ def calculateHbcAndP(grid, element, i):
         # dolna sciana
         # print("Number of element:", i)
         # print("\n node 1 and 2\n")
+        dJ = math.sqrt(pow(grid.nodes[node2 - 1].x - grid.nodes[node1 - 1].x, 2) + pow(
+            grid.nodes[node2 - 1].y - grid.nodes[node1 - 1].y, 2)) / 2
         for j in range(4):
             for k in range(4):
-                dJ = grid.xB / 2
                 pc1[j][k] += element.bottom[0][k] * element.bottom[0][j] * dJ
                 pc2[j][k] += element.bottom[1][k] * element.bottom[1][j] * dJ
             p1[j] += element.bottom[0][j] * t * dJ * alpha
@@ -163,9 +165,10 @@ def calculateHbcAndP(grid, element, i):
         # lewa sciana
         # print("Number of element:", i)
         # print("\nnode 1 and 4")
+        dJ = dJ = math.sqrt(pow(grid.nodes[node4 - 1].x - grid.nodes[node1 - 1].x, 2) + pow(
+            grid.nodes[node4 - 1].y - grid.nodes[node1 - 1].y, 2)) / 2
         for j in range(4):
             for k in range(4):
-                dJ = grid.yH / 2
                 pc1[j][k] += element.left[0][k] * element.left[0][j] * dJ
                 pc2[j][k] += element.left[1][k] * element.left[1][j] * dJ
             p1[j] += element.left[0][j] * t * dJ * alpha
@@ -174,9 +177,10 @@ def calculateHbcAndP(grid, element, i):
         # prawa sciana
         # print("Number of element:", i)
         # print("\nnode 2 and 3")
+        dJ = math.sqrt(pow(grid.nodes[node3 - 1].x - grid.nodes[node2 - 1].x, 2) + pow(
+            grid.nodes[node3 - 1].y - grid.nodes[node2 - 1].y, 2)) / 2
         for j in range(4):
             for k in range(4):
-                dJ = grid.yH / 2
                 pc1[j][k] += element.right[0][k] * element.right[0][j] * dJ
                 pc2[j][k] += element.right[1][k] * element.right[1][j] * dJ
             p1[j] += element.right[0][j] * t * dJ * alpha
@@ -185,9 +189,10 @@ def calculateHbcAndP(grid, element, i):
         # gorna sciana
         # print("Number of element:", i)
         # print("\nnode 3 and 4")
+        dJ = math.sqrt(pow(grid.nodes[node4 - 1].x - grid.nodes[node3 - 1].x, 2) + pow(
+            grid.nodes[node4 - 1].y - grid.nodes[node3 - 1].y, 2)) / 2
         for j in range(4):
             for k in range(4):
-                dJ = grid.xB / 2
                 pc1[j][k] += element.top[0][k] * element.top[0][j] * dJ
                 pc2[j][k] += element.top[1][k] * element.top[1][j] * dJ
             p1[j] += element.top[0][j] * t * dJ * alpha
@@ -227,40 +232,90 @@ def sumCandP(t0):
     return sumCP
 
 
-def iteration(grid, t0):
+def iteration(t0):
     sumCP = sumCandP(t0)
     t0 = np.linalg.solve(sumHC, sumCP)
     print(f'Minimum: {min(t0)}, Max: {max(t0)},\n')
     iterations = int(time / dt)
     for i in range(iterations - 1):
         sumHandC()
-        print(f't0: {t0} \n')
+        #print(f't0: {t0} \n')
         sumCP = sumCandP(t0)
-        print(f'wartosc wektora cp: {sumCP} ')
+        #print(f'wartosc wektora cp: {sumCP} ')
         t0 = np.linalg.solve(sumHC, sumCP)
-        print(f'Numer iteracji: {i+1}, Minimum: {min(t0)}, Max: {max(t0)},\n')
+        print(f'Numer iteracji: {i + 1}, Minimum: {min(t0)}, Max: {max(t0)},\n')
+
+
+def readData():
+    # f = open("tests/test1.txt", "r")
+    # f = open("tests/test2.txt", "r")
+    f = open("tests/test3.txt", "r")
+    # f = open("tests/test4.txt", "r")
+    buff = []
+    parameters = []
+    nodes = []
+    elements = []
+    bc = []
+    data = [parameters, nodes, elements, bc]
+    i = 0
+    for x in f:
+        x = x.replace('\n', '')
+        x = x.translate(str.maketrans('', '', 'abcdefghijklmnoprstuvwyxzABCDEFGHIJKLMNOPRSTYUVWXZ'))
+        x = x.replace(' ', '')
+        if x[0] == '*':
+            i += 1
+        else:
+            data[i].append(x)
+    for x in range(len(parameters)):
+        parameters[x] = float(parameters[x])
+    for x in range(len(nodes)):
+        nodes[x] = nodes[x].split(',')
+        nodes[x] = list(map((lambda y: float(y)), nodes[x]))
+    for x in range(len(elements)):
+        elements[x] = elements[x].split(',')
+        elements[x] = list(map((lambda y: int(y)), elements[x]))
+    data[3] = list(map((lambda y: int(y)), bc[0].split(',')))
+
+    #print(parameters)
+    # print(nodes)
+    # print(elements)
+    # print(bc)
+    return data
+
+
+def magic(data):
+    #tworzenie dowolnego grida
+    grid = Grid(2, 2, 2, 2)
+    grid.nodes = list(map((lambda z: Node(z[1], z[2], z[0])), data[1]))
+    grid.elements = list(map((lambda z: Element([z[1], z[2], z[3], z[4]], z[0])), data[2]))
+    grid.amount = len(grid.nodes)
+    grid.nE = len(grid.elements)
+    for i in range(grid.amount):
+        grid.nodes[i].flag = 1 if grid.nodes[i].ID in data[3] else 0
+    return grid
 
 
 
 def main():
-    global t, alpha, c, ro, dt, time, con
-    grid = Grid(0.1, 0.1, 4, 4)
-    c = 700  # cieplo wlasciwe
-    ro = 7800  # gęstosc
-    alpha = 300  # wspolczynnik przewodzenia ciepla
-    t = 1200  # temperatura otoczenia
-    dt = 50  # krok czasowy
-    time = 500
-    con = 25
-    t0 = [100 for _ in range(grid.amount)]  # wektor temperatur poczatkowych
-    print(grid.nodes)
-    # c.printFlag()
-    grid.printElements()
+    global t, alpha, c, ro, dt, time, con, nodesNumber, elementNumber
+    data = readData()
+    time, dt, con, alpha, t, t0, ro, c, nodesNumber, elementNumber = data[0]
+    grid = magic(data)
+    # grid = Grid(0.1, 0.1, 4, 4)
+    # c = 700  # cieplo wlasciwe
+    # ro = 7800  # gęstosc
+    # alpha = 300  # wspolczynnik przewodzenia ciepla
+    # t = 1200  # temperatura otoczenia
+    # dt = 50  # krok czasowy
+    # time = 500
+    # con = 25
+    t0 = [data[0][5] for _ in range(grid.amount)]  # wektor temperatur poczatkowych
+    # print(grid.nodes)
+    # grid.printElements()
     element = Element4_2D()
     calculate(element.ksi, element.eta, grid, element, t0)
-    print(f'H Globalne:\n {HGlobal} \nP Globalne: \n {PGlobal} \n C Globalne: \n {CGlobal}')
-    print("\n Suma H i C:\n", sumHC)
-    #print("\n Suma C i P:\n", sumCP)
+    #print(f'H Globalne:\n {HGlobal} \nP Globalne: \n {PGlobal} \n C Globalne: \n {CGlobal}')
+    #print("\n Suma H i C:\n", sumHC)
 
 
 if __name__ == '__main__':

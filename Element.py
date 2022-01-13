@@ -16,7 +16,7 @@ class Element:
         self.IDn = IDn
 
     def __str__(self):
-        return f'rectangle id: {self.ID}\nnodes id:{self.IDn}'
+        return f'\nrectangle id: {self.ID} nodes id:{self.IDn}'
 
     def __repr__(self):
-        return f'rectangle id: {self.ID}\nnodes id:{self.IDn}'
+        return f'\nrectangle id: {self.ID} nodes id:{self.IDn}'

@@ -45,7 +45,7 @@ class Grid:
                 ID2 += 1
                 ID3 += 1
                 ID4 += 1
-                a += 1  # to jest inkrement w zaleznosci od tego w której kolumnie tworzone są elementy
+                a += 1  # to jest inkrement w zaleznosci od tego w której kolumnie tworzone sa elementy
             IDn = [ID1, ID2, ID3, ID4]
             self.elements.append(Element(IDn, ID))
             ID += 1
